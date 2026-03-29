@@ -2,7 +2,4 @@
 __pycache__/
 *.pyc
 tk_annotation_env/
-annotation_results/
-*.csv
-*.json
 .DS_Store

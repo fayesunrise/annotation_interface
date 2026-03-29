@@ -33,10 +33,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL           = "gpt-4o-mini"
 
 # ── Run columns ───────────────────────────────────────────────────────────────
-LABEL_COLS = [f"tk_label_run{i}" for i in range(1, 6)]
-CONF_COLS  = [f"tk_conf_run{i}"  for i in range(1, 6)]
+LABEL_COLS = [f"tk_label_run{i}" for i in range(1, 5)]
+CONF_COLS  = [f"tk_conf_run{i}"  for i in range(1, 5)]
 RUN_NAMES  = {1: "OB researcher", 2: "Economist", 3: "Manager",
-              4: "Paraphrased OB", 5: "Role persona"}
+              4: "Paraphrased OB"}
 
 OVERRIDE_REASONS = [
     "Select reason…",
@@ -496,9 +496,20 @@ def render_annotation_card(row: pd.Series, decisions_df: pd.DataFrame, coder_id:
         render_verifier_breakdown(row)
         st.markdown("")
 
-        n_runs = sum(1 for i in range(1, 6) if not pd.isna(row[f"tk_label_run{i}"]))
-        for i in range(1, n_runs + 1):
-            render_run_card(i, row)
+        # Toggle show/hide LLM runs
+        show_key = f"show_runs_{job_id}"
+        if show_key not in st.session_state:
+            st.session_state[show_key] = False
+
+        btn_label = "▼ Hide LLM annotations" if st.session_state[show_key] else "▶ Show LLM annotations"
+        if st.button(btn_label, key=f"toggle_runs_{job_id}"):
+            st.session_state[show_key] = not st.session_state[show_key]
+            st.rerun()
+
+        if st.session_state[show_key]:
+            n_runs = sum(1 for i in range(1, 5) if not pd.isna(row[f"tk_label_run{i}"]))
+            for i in range(1, n_runs + 1):
+                render_run_card(i, row)
 
         # Requery result panel (if triggered)
         if "requery_result" in st.session_state and st.session_state["requery_result"]:
